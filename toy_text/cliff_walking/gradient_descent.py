@@ -1,7 +1,6 @@
 import gymnasium as gym
 import numpy as np
 
-
 env = gym.make('CliffWalking-v0', render_mode="human")
 
 def softmax_convert_into_pi_from_theta(theta):
@@ -97,17 +96,18 @@ with open(pi_file_path, 'w') as output_file:
         s_a_history = goal_cliff_return_s_a_history(pi)
         new_theta = update_theta(theta, pi, s_a_history)
         new_pi = softmax_convert_into_pi_from_theta(new_theta)
+        amount_of_policy_change = np.sum(np.abs(new_pi - pi))
 
-        output_file.write('정책 변화: ', np.sum(np.abs(new_pi - pi)))  # 정책의 변화를 출력
-        output_file.write('목표 지점에 이르기까지 걸린 단계 수는 ' + str(len(s_a_history) - 1) + '단계입니다')
+        output_file.write('정책 변화: ' + str(amount_of_policy_change) + '\n')  # 정책의 변화를 출력
+        output_file.write('목표 지점에 이르기까지 걸린 단계 수는 ' + str(len(s_a_history) - 1) + '단계입니다\n\n')
 
         theta = new_theta
         pi = new_pi
 
-        if np.sum(np.abs(new_pi - pi)) < stop_epsilon:
+        if amount_of_policy_change < stop_epsilon:
             break
 
     np.set_printoptions(precision=3, suppress=True)
-    output_file.write('최종 정책: ', pi)
+    output_file.write('최종 정책: \n' + str(pi))
 
 env.close()
